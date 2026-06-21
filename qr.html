@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ADEVOS-X BOT • QR SCAN</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --green: #2ecc71;
+      --green-dark: #1f8b4c;
+      --green-soft: #7ef4a3;
+      --green-border: rgba(46, 204, 113, 0.3);
+      --black: #030303;
+      --card-bg: #0b0e0c;
+      --white: #f2f5f2;
+      --shadow-green: 0 8px 20px rgba(46,204,113,0.15);
+      --glow-green: 0 0 12px rgba(46,204,113,0.35);
+    }
+    body {
+      background: var(--black);
+      font-family: 'Montserrat', sans-serif;
+      color: var(--white);
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 100px 20px 50px;
+    }
+    .bg-qr { position:fixed; inset:0; z-index:-2; background: radial-gradient(circle at 30% 50%, #102315, #000); }
+    .bg-grid { position:fixed; inset:0; z-index:-1; opacity:0.1; background-image: linear-gradient(rgba(46,204,113,0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(46,204,113,0.12) 1px, transparent 1px); background-size: 46px 46px; }
+    .ticker-bar { position:fixed; top:0; left:0; right:0; height:40px; z-index:1050; display:flex; background:rgba(0,0,0,0.94); border-bottom:1px solid var(--green-border); }
+    .ticker-label { flex-shrink:0; display:flex; align-items:center; padding:0 20px; background:linear-gradient(115deg, var(--green-dark), #1c3f2a); font-family:'Orbitron',monospace; font-size:.65rem; color:#fff; gap:6px; }
+    .ticker-track { flex:1; overflow:hidden; }
+    .ticker-items { display:flex; animation:tickerScroll 24s linear infinite; white-space:nowrap; }
+    .ticker-items span { padding:0 32px; font-family:'Orbitron',monospace; font-size:.68rem; color:var(--green-soft); }
+    @keyframes tickerScroll { from{transform:translateX(100vw);} to{transform:translateX(-100%);} }
+    header { position:fixed; top:40px; left:0; right:0; z-index:1000; display:flex; justify-content:space-between; padding:.8rem 2rem; background:rgba(3,3,3,0.88); backdrop-filter:blur(16px); border-bottom:1px solid var(--green-border); }
+    .logo-wrap { display:flex; align-items:center; gap:12px; text-decoration:none; }
+    .logo-img { width:36px; height:36px; border-radius:50%; border:1.5px solid var(--green); }
+    .logo-text { font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:800; background:linear-gradient(135deg,var(--green),var(--green-soft)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+    .back-btn { padding:6px 18px; border:1px solid var(--green-border); border-radius:60px; font-family:'Orbitron',monospace; font-size:.68rem; color:var(--green); text-decoration:none; transition:0.2s; }
+    .back-btn:hover { background:rgba(46,204,113,0.1); border-color:var(--green); }
+    .qr-card { max-width:450px; width:100%; background:var(--card-bg); border:1px solid var(--green-border); border-radius:24px; padding:2rem; text-align:center; box-shadow:0 20px 40px rgba(0,0,0,0.6); }
+    h2 { font-family:'Orbitron',sans-serif; font-size:1.5rem; background:linear-gradient(135deg,var(--green),#b6ffcf); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:4px; }
+    .sub { font-size:.7rem; color:var(--white-muted); letter-spacing:2px; margin-bottom:1.2rem; }
+    .status-bar { display:flex; align-items:center; justify-content:center; gap:8px; background:rgba(0,0,0,0.5); padding:8px 14px; border-radius:60px; width:fit-content; margin:0 auto 1.4rem; border:1px solid var(--green-border); font-size:.7rem; }
+    .status-dot { width:8px; height:8px; border-radius:50%; background:var(--green); box-shadow:0 0 6px var(--green); animation:pulse 1s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+    .qr-frame { width:240px; height:240px; margin:0 auto 1.5rem; border-radius:20px; border:2px solid var(--green-border); display:flex; align-items:center; justify-content:center; background:#060906; position:relative; }
+    #qr-img { width:100%; height:100%; object-fit:contain; display:none; border-radius:16px; padding:6px; }
+    .spinner-wrap { display:flex; flex-direction:column; align-items:center; gap:12px; }
+    .spinner { width:44px; height:44px; border:3px solid rgba(46,204,113,0.2); border-top-color:var(--green); border-radius:50%; animation:spin 0.7s linear infinite; }
+    @keyframes spin { to{transform:rotate(360deg);} }
+    .steps { display:flex; flex-direction:column; gap:12px; margin:1.2rem 0 1.6rem; text-align:left; }
+    .step { display:flex; align-items:center; gap:12px; background:rgba(0,0,0,0.3); padding:10px 14px; border-radius:14px; }
+    .step-n { width:26px; height:26px; border-radius:50%; border:1.5px solid var(--green); display:flex; align-items:center; justify-content:center; font-family:'Orbitron',monospace; font-size:.7rem; color:var(--green); }
+    .btn-row { display:flex; gap:12px; justify-content:center; margin-top:0.5rem; }
+    .btn { padding:.6em 1.2em; border-radius:40px; font-family:'Orbitron',monospace; font-size:.7rem; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:0.2s; cursor:pointer; }
+    .btn-primary { background:transparent; border:1.5px solid var(--green); color:var(--green); }
+    .btn-primary:hover { background:rgba(46,204,113,0.12); box-shadow:var(--shadow-green); color:#fff; }
+    .btn-accent { background:linear-gradient(105deg, var(--green-dark), #1f653e); border:none; color:#fff; }
+    footer { margin-top:28px; font-size:.7rem; color:rgba(46,204,113,0.5); font-family:'Orbitron',monospace; }
+    @media(max-width:500px){ .qr-frame { width:200px; height:200px; } .qr-card { padding:1.4rem; } }
+  </style>
+</head>
+<body>
+<div class="bg-qr"></div><div class="bg-grid"></div>
+<div class="ticker-bar"><div class="ticker-label"><i class="fas fa-qrcode"></i> QR ACTIVE</div><div class="ticker-track"><div class="ticker-items"><span>Open WhatsApp → Linked Devices → Link a Device → Scan QR</span><span>Point your camera at the code below</span><span>Your session ID will be sent instantly</span></div></div></div>
+<header><a class="logo-wrap" href="/"><img src="https://files.catbox.moe/rpju62.jpg" class="logo-img" onerror="this.src='https://via.placeholder.com/36'"><div class="logo-text">ADEVOS-X BOT</div></a><a href="/" class="back-btn"><i class="fas fa-arrow-left"></i> HOME</a></header>
+<div class="qr-card"><h2>QR CODE</h2><div class="sub">SCAN TO LINK DEVICE</div><div class="status-bar"><div class="status-dot" id="qr-status-dot"></div><span id="qr-status-text">Generating QR...</span></div><div class="qr-frame" id="qr-frame"><div class="spinner-wrap" id="qr-spinner"><div class="spinner"></div><div style="font-size:.7rem; color:var(--green-soft);">loading secure code</div></div><img id="qr-img" alt="QR"></div><div class="steps"><div class="step"><div class="step-n">1</div><span>Open <strong>WhatsApp</strong> → Settings → <strong>Linked Devices</strong></span></div><div class="step"><div class="step-n">2</div><span>Tap <strong>Link a Device</strong> → scan this QR</span></div><div class="step"><div class="step-n">3</div><span>Session ID delivered to your WhatsApp ✅</span></div></div><div class="btn-row"><button class="btn btn-primary" onclick="refreshQR()"><i class="fas fa-sync-alt"></i> Refresh QR</button><a href="/pair" class="btn btn-accent"><i class="fas fa-mobile-alt"></i> Use Pair Code</a></div></div>
+<footer>© Adevos-X Tech • dormant green | QR expires every 55s</footer>
+<script>
+  const qrImg = document.getElementById('qr-img');
+  const spinner = document.getElementById('qr-spinner');
+  const statusText = document.getElementById('qr-status-text');
+  const statusDot = document.getElementById('qr-status-dot');
+  function refreshQR() {
+    qrImg.style.display = 'none';
+    spinner.style.display = 'flex';
+    statusText.innerText = 'Generating fresh QR...';
+    statusDot.style.background = '#ffe083';
+    const img = new Image();
+    img.onload = () => {
+      spinner.style.display = 'none';
+      qrImg.src = img.src;
+      qrImg.style.display = 'block';
+      statusText.innerText = 'QR Ready — Scan now';
+      statusDot.style.background = '#2ecc71';
+      setTimeout(refreshQR, 55000);
+    };
+    img.onerror = () => {
+      spinner.style.display = 'none';
+      statusText.innerText = 'Failed — tap refresh';
+      statusDot.style.background = '#ff7f6e';
+      qrImg.style.display = 'none';
+    };
+    img.src = '/scan?' + Date.now();
+  }
+  window.addEventListener('load', refreshQR);
+</script>
+</body>
+</html>
