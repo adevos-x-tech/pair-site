@@ -13,7 +13,7 @@
   "author": "Adevos-X",
   "license": "GPL-3.0",
   "dependencies": {
-    "@whiskeysockets/baileys": "^v7.0.0-rc.9",
+           "@whiskeysockets/baileys": "npm:davexbaileys@2.5.24",
     "qrcode": "^1.5.3",
     "awesome-phonenumber": "^2.64.0",
     "pino": "^8.1.0",
