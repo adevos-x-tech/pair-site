@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ADEVOS-X BOT | Dormant Green</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green: #2ecc71;
+      --green-dark: #1f8b4c;
+      --green-soft: #7ef4a3;
+      --green-glass: rgba(46, 204, 113, 0.08);
+      --green-border: rgba(46, 204, 113, 0.28);
+      --black: #030303;
+      --card-black: #0b0e0c;
+      --white: #f2f5f2;
+      --white-muted: #bfcdbf;
+      --shadow-green: 0 6px 18px rgba(46, 204, 113, 0.12);
+      --glow-green: 0 0 12px rgba(46, 204, 113, 0.3);
+      --radius: 18px;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      background: var(--black);
+      font-family: 'Montserrat', sans-serif;
+      color: var(--white);
+      overflow-x: hidden;
+    }
+    /* background pattern */
+    .bg-dark {
+      position: fixed; inset:0; z-index:-2;
+      background: radial-gradient(circle at 20% 30%, #0f1a12, #000000);
+    }
+    .bg-grid {
+      position: fixed; inset:0; z-index:-1;
+      opacity:0.12;
+      background-image: linear-gradient(rgba(46,204,113,0.1) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(46,204,113,0.1) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+    }
+    /* ticker */
+    .ticker-bar {
+      position:fixed; top:0; left:0; right:0; height:40px;
+      z-index:1000; display:flex; overflow:hidden;
+      background:rgba(0,0,0,0.94); backdrop-filter:blur(4px);
+      border-bottom:1px solid var(--green-border);
+    }
+    .ticker-label {
+      flex-shrink:0; display:flex; align-items:center; padding:0 20px;
+      background:linear-gradient(115deg, var(--green-dark), #1c3f2a);
+      font-family:'Orbitron',monospace; font-size:.65rem; letter-spacing:2px;
+      color:#fff; white-space:nowrap; gap:6px;
+    }
+    .ticker-track { flex:1; overflow:hidden; display:flex; align-items:center; }
+    .ticker-items { display:flex; animation:tickerScroll 28s linear infinite; white-space:nowrap; }
+    .ticker-items span { padding:0 36px; font-family:'Orbitron',monospace; font-size:.7rem; color:var(--green-soft); text-shadow:0 0 4px rgba(46,204,113,0.3); }
+    @keyframes tickerScroll { from{transform:translateX(100vw);} to{transform:translateX(-100%);} }
+
+    /* navbar */
+    .navbar {
+      position:fixed; top:40px; left:0; right:0; z-index:900;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0 32px; height:58px;
+      background:rgba(3,3,3,0.88); backdrop-filter:blur(16px);
+      border-bottom:1px solid var(--green-border);
+    }
+    .nav-logo {
+      font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:800;
+      background:linear-gradient(135deg,var(--green),var(--green-soft));
+      -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+      text-decoration:none;
+    }
+    .nav-links { display:flex; gap:22px; list-style:none; }
+    .nav-links a { font-size:.7rem; letter-spacing:1px; color:var(--white-muted); text-decoration:none; font-family:'Orbitron',sans-serif; transition:0.2s; }
+    .nav-links a:hover { color:var(--green); text-shadow:var(--glow-green); }
+
+    /* page */
+    .page { position:relative; z-index:1; padding-top:100px; }
+    section { padding:70px 24px; max-width:1200px; margin:0 auto; }
+    .section-title {
+      font-family:'Orbitron',sans-serif; font-size:clamp(1.3rem,3vw,2rem);
+      color:var(--green); text-align:center; margin-bottom:44px;
+      letter-spacing:-0.3px;
+    }
+    .section-title::after { content:''; display:block; width:60px; height:2px; margin:12px auto 0; background:var(--green); border-radius:2px; }
+
+    /* hero */
+    #hero {
+      min-height:85vh; display:flex; flex-direction:column;
+      align-items:center; justify-content:center; text-align:center;
+      gap:24px; padding:100px 24px 70px;
+    }
+    .hero-badge {
+      display:inline-flex; align-items:center; gap:8px;
+      padding:5px 18px; border:1px solid var(--green); border-radius:50px;
+      font-size:.68rem; font-family:'Orbitron',sans-serif;
+      color:var(--green); background:rgba(46,204,113,0.05);
+    }
+    .hero-title {
+      font-family:'Orbitron',sans-serif; font-size:clamp(2.5rem,7vw,5rem);
+      font-weight:900; line-height:1.05;
+      background:linear-gradient(135deg,var(--green),#bbf7d0);
+      -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+    }
+    .hero-sub {
+      font-family:'Orbitron',sans-serif; font-size:clamp(.8rem,1.8vw,.95rem);
+      color:var(--green-soft); letter-spacing:3px; border-right:2px solid var(--green);
+      overflow:hidden; white-space:nowrap; max-width:fit-content; margin:0 auto;
+      animation:typeIn 2s steps(30) forwards, blink .8s step-end infinite 2s;
+    }
+    @keyframes typeIn { from{width:0} to{width:100%} }
+    @keyframes blink { 50%{border-color:transparent} }
+
+    .btn {
+      padding:.75em 2em; font-family:'Orbitron',sans-serif; font-size:.78rem;
+      font-weight:700; letter-spacing:1.5px; border-radius:40px;
+      cursor:pointer; transition:0.25s; text-decoration:none; display:inline-flex;
+      align-items:center; gap:8px;
+    }
+    .btn-primary { background:transparent; border:1.5px solid var(--green); color:var(--green); }
+    .btn-primary:hover { background:rgba(46,204,113,0.12); box-shadow:var(--shadow-green); color:#fff; transform:translateY(-2px); }
+    .btn-accent { background:linear-gradient(105deg, var(--green-dark), #1f653e); border:none; color:#fff; }
+    .btn-accent:hover { box-shadow:var(--shadow-green); transform:translateY(-2px); }
+    .hero-actions { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
+
+    /* cards */
+    .card {
+      background:var(--card-black); border:1px solid var(--green-border);
+      border-radius:var(--radius); padding:26px 22px;
+      transition:0.25s; position:relative; overflow:hidden;
+    }
+    .card::before {
+      content:''; position:absolute; top:0; left:-100%; width:70%; height:2px;
+      background:linear-gradient(90deg,transparent,var(--green),var(--green-soft),transparent);
+      transition:left 0.55s;
+    }
+    .card:hover::before { left:120%; }
+    .card .corner { position:absolute; width:14px; height:14px; opacity:0.4; transition:0.2s; }
+    .card:hover .corner { opacity:1; }
+    .corner-tl { top:10px; left:10px; border-top:2px solid var(--green); border-left:2px solid var(--green); border-radius:3px 0 0 0; }
+    .corner-tr { top:10px; right:10px; border-top:2px solid var(--green); border-right:2px solid var(--green); border-radius:0 3px 0 0; }
+    .corner-bl { bottom:10px; left:10px; border-bottom:2px solid var(--green); border-left:2px solid var(--green); border-radius:0 0 0 3px; }
+    .corner-br { bottom:10px; right:10px; border-bottom:2px solid var(--green); border-right:2px solid var(--green); border-radius:0 0 3px 0; }
+    .card-icon { font-size:1.8rem; margin-bottom:14px; color:var(--green); }
+    .card h3 { font-family:'Orbitron',sans-serif; font-size:.95rem; color:var(--green-soft); margin-bottom:8px; }
+    .features-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+    .feature-card .btn { width:100%; justify-content:center; margin-top:18px; }
+
+    /* about + contact */
+    #about .about-inner { display:grid; grid-template-columns:1fr 1fr; gap:36px; align-items:center; }
+    .tech-chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+    .chip { padding:4px 12px; border:1px solid var(--green-border); border-radius:50px; font-size:.7rem; color:var(--green); background:rgba(0,0,0,0.4); }
+    .progress-item label { display:flex; justify-content:space-between; font-size:.72rem; color:var(--white-muted); margin-bottom:5px; }
+    .progress-bar { height:5px; background:rgba(46,204,113,0.15); border-radius:50px; overflow:hidden; }
+    .progress-fill { height:100%; background:var(--green); width:0%; transition:width 1.2s ease; }
+    #contact .contact-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+    .contact-card { text-align:center; }
+    .contact-card i { font-size:2rem; margin-bottom:12px; color:var(--green); }
+
+    footer {
+      background:#050805; border-top:1px solid var(--green-border);
+      padding:36px 24px; text-align:center;
+    }
+    .footer-logo { font-family:'Orbitron',sans-serif; font-size:1.2rem; font-weight:900; background:linear-gradient(135deg,var(--green),var(--green-soft)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+    .footer-links { display:flex; justify-content:center; gap:24px; margin:16px 0; }
+    .footer-links a { font-size:1.3rem; color:var(--white-muted); transition:0.2s; }
+    .footer-links a:hover { color:var(--green); transform:translateY(-3px); }
+    @media(max-width:900px){ .features-grid, #about .about-inner, #contact .contact-grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+<div class="bg-dark"></div><div class="bg-grid"></div>
+<div class="ticker-bar"><div class="ticker-label"><i class="fas fa-dove"></i> DORMANT</div><div class="ticker-track"><div class="ticker-items"><span>Adevos-X Bot • Green Edition • Pairing & QR ready</span><span>Secure session IDs delivered to WhatsApp</span><span>Deploy your bot with one click</span><span>Dormant theme • low latency</span></div></div></div>
+<nav class="navbar"><a class="nav-logo" href="#hero">ADEVOS-<span style="color:var(--green)">X</span> BOT</a><ul class="nav-links"><li><a href="#features">Features</a></li><li><a href="#about">About</a></li><li><a href="#contact">Contact</a></li></ul></nav>
+<div class="page">
+  <section id="hero"><div class="hero-badge"><div class="badge-dot" style="background:var(--green)"></div> SESSION GENERATOR</div><h1 class="hero-title">ADEVOS-X<br>BOT</h1><div class="hero-sub">WhatsApp Bot Session Centre</div><div class="hero-actions"><a href="/qr" class="btn btn-primary"><i class="fas fa-qrcode"></i> QR Code</a><a href="/pair" class="btn btn-primary"><i class="fas fa-mobile-screen"></i> Pair Code</a><a href="#" class="btn btn-accent"><i class="fas fa-rocket"></i> Deploy Bot</a></div></section>
+  <section id="features"><h2 class="section-title">What We Offer</h2><div class="features-grid"><div class="card feature-card"><span class="corner corner-tl"></span><span class="corner corner-tr"></span><span class="corner corner-bl"></span><span class="corner corner-br"></span><div class="card-icon"><i class="fas fa-qrcode"></i></div><h3>QR Pairing</h3><a href="/qr" class="btn btn-primary">Get QR</a></div><div class="card feature-card"><div class="card-icon"><i class="fas fa-mobile-screen-button"></i></div><h3>8-Digit Pair</h3><a href="/pair" class="btn btn-primary">Pair Code</a></div><div class="card feature-card"><div class="card-icon"><i class="fas fa-shield-halved"></i></div><h3>Secure Sessions</h3></div><div class="card feature-card"><div class="card-icon"><i class="fas fa-bolt"></i></div><h3>Lightning Fast</h3></div><div class="card feature-card"><div class="card-icon"><i class="fas fa-users"></i></div><h3>Community</h3></div></div></section>
+  <section id="about"><div class="about-inner"><div class="card" style="opacity:1"><h2 style="color:var(--green)">About Us</h2><div class="tech-chips"><span class="chip">Node.js</span><span class="chip">Baileys</span><span class="chip">Express</span><span class="chip">WhatsApp Web</span></div></div><div class="about-visual"><div class="progress-item"><label>Reliability <span>98%</span></label><div class="progress-bar"><div class="progress-fill" data-w="98"></div></div></div><div class="progress-item"><label>Speed <span>95%</span></label><div class="progress-bar"><div class="progress-fill" data-w="95"></div></div></div><div class="progress-item"><label>Uptime <span>99%</span></label><div class="progress-bar"><div class="progress-fill" data-w="99"></div></div></div></div></div></section>
+  <section id="contact"><h2 class="section-title">Get In Touch</h2><div class="contact-grid"><div class="card contact-card"><i class="fab fa-whatsapp"></i><h4>WhatsApp</h4><a href="https://wa.me/255663402315">+255 663 402 315</a></div><div class="card contact-card"><i class="fab fa-telegram"></i><h4>Telegram</h4><a href="https://t.me/adevosX">@adevosX</a></div><div class="card contact-card"><i class="fab fa-youtube"></i><h4>YouTube</h4><a href="#">@adevosX</a></div></div></section>
+  <footer><div class="footer-logo">ADEVOS-X BOT</div><div class="footer-links"><a href="#"><i class="fab fa-youtube"></i></a><a href="#"><i class="fab fa-instagram"></i></a><a href="#"><i class="fab fa-telegram"></i></a><a href="#"><i class="fab fa-github"></i></a><a href="#"><i class="fab fa-whatsapp"></i></a></div><p class="footer-copy">© Adevos-X Tech • dormant green theme</p></footer>
+</div>
+<script>
+  const observer = new IntersectionObserver((entries) => { entries.forEach(e => { if(e.isIntersecting) { e.target.classList.add('visible'); e.target.style.opacity='1'; observer.unobserve(e.target); } }); }, {threshold:0.2});
+  document.querySelectorAll('.card').forEach(c => { c.style.opacity='0'; c.style.transform='translateY(18px)'; c.style.transition='0.4s'; observer.observe(c); });
+  document.querySelectorAll('.progress-fill').forEach(bar => { const w = bar.getAttribute('data-w'); if(w) bar.style.width = w+'%'; });
+</script>
+</body>
+</html>
