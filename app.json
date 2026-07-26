@@ -1,18 +1,24 @@
 {
-    "name": "Session Generator",
-    "description": "Web Session Generator",
-    "logo": "https://files.catbox.moe/bdwqa7.jpg",
-    "repository": "https://github.com/adevosxtech/adevosX-Bot",
-    "keywords": ["Adevos-X Tech"],
-    "success_url": "/", 
-    "buildpacks": [{ "url": "https://github.com/heroku/heroku-buildpack-nodejs#latest" } ],
-    "env": {      
-      "PORT": {
-        "description": "Port for web app.4000,5000,3000... any!",
-        "value": "5000",
-        "required": false 
-      }
-    }   
-
+  "name": "Session Generator",
+  "description": "Web Session Generator",
+  "logo": "https://files.catbox.moe/bdwqa7.jpg",
+  "repository": "https://github.com/adevos-x-tech/adevosxbot",
+  "success_url": "/",
+  "buildpacks": [
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-nodejs#latest"
+    }
+  ],
+  "env": {
+    "MESSAGE": {
+      "description": "Ujumbe utakaotokea (Mfano: Adevos-X Tech)",
+      "value": "Adevos-X Tech",
+      "required": false
+    },
+    "PORT": {
+      "description": "Port ya kuendeshea web app",
+      "value": "5000",
+      "required": false
+    }
+  }
 }
-
