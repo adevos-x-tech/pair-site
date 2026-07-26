@@ -1,5 +1,5 @@
 {
-    "name": "junex-ultra-session",
+    "name": "adevos-x-session",
     "description": "Adevos-X Bot WhatsApp session generator",
     "version": "1.0.0",
     "main": "./index.js",
