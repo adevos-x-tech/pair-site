@@ -14,17 +14,22 @@ const {
 
 const router = express.Router();
 
+// Memory store kwa ajili ya ku-stream session ID kwenda browser/website
+const pairSessions = new Map();
+
 function removeFile(filePath) {
     if (!fs.existsSync(filePath)) return false;
     fs.rmSync(filePath, { recursive: true, force: true });
 }
 
+// 1. Route ya kuomba Pairing Code
 router.get('/', async (req, res) => {
     const id = makeid();
     let num = req.query.number;
 
     async function JUNEX() {
-        const { state, saveCreds } = await useMultiFileAuthState('./temp/' + id);
+        const sessionPath = './temp/' + id;
+        const { state, saveCreds } = await useMultiFileAuthState(sessionPath);
         try {
             const { version } = await fetchLatestBaileysVersion();
             const logger = pino({ level: 'silent' });
@@ -49,27 +54,39 @@ router.get('/', async (req, res) => {
 
                 if (connection === 'open') {
                     try {
-                        await client.sendMessage(client.user.id, {
-                            text: 'Generating your session, please wait a moment...'
-                        });
-                        await delay(50000);
-                        const data = fs.readFileSync(__dirname + `/temp/${id}/creds.json`);
-                        await delay(8000);
-                        const b64data = Buffer.from(data).toString('base64');
-                        const session = await client.sendMessage(client.user.id, { text: 'ADEVOS-X:~' + b64data });
-                        await client.sendMessage(client.user.id, {
-                            text: "```Adevos-X Tech On Air```"
-                        }, { quoted: session });
-                        await delay(500);
+                        await delay(3000);
+
+                        const credsData = fs.readFileSync(`${sessionPath}/creds.json`);
+                        const b64data = Buffer.from(credsData).toString('base64');
+                        const sessionId = 'ADEVOS-X:~' + b64data;
+
+                        // Hifadhi session ID ili web/browser iipate
+                        pairSessions.set(id, { status: 'success', session: sessionId });
+
+                        // Tuma WhatsApp
+                        const sessionMsg = await client.sendMessage(client.user.id, { text: sessionId });
+
+                        const englishInstructions = 
+                            `*✨ ADEVOS-X BOT SESSION ID GENERATED SUCCESSFULLY ✨*\n\n` +
+                            `Dear user, your authentication process is complete!\n\n` +
+                            `📌 *IMPORTANT INSTRUCTIONS:*\n` +
+                            `1. *Copy Your Session ID:* Copy the session code above or return to the web dashboard to copy it directly.\n` +
+                            `2. *Keep It Confidential:* Do **NEVER** share this Session ID with anyone. It gives full access to your WhatsApp account.\n` +
+                            `3. *Bot Deployment:* Paste this Session ID into your deployment environment variable (\`SESSION_ID\`) when setting up your **Adevos-X Bot** instance.\n\n` +
+                            `Powered by *Adevos-X Tech* 🚀`;
+
+                        await client.sendMessage(client.user.id, { text: englishInstructions }, { quoted: sessionMsg });
+
+                        await delay(2000);
                         await client.ws.close();
-                        removeFile('./temp/' + id);
+                        removeFile(sessionPath);
                     } catch (e) {
                         console.log('Error sending session messages:', e);
                     }
                 } else if (connection === 'close') {
                     const code = lastDisconnect?.error?.output?.statusCode;
                     if (code !== DisconnectReason.loggedOut) {
-                        await delay(5000);
+                        await delay(3000);
                         JUNEX();
                     }
                 }
@@ -80,13 +97,15 @@ router.get('/', async (req, res) => {
                 num = num.replace(/[^0-9]/g, '');
                 const code = await client.requestPairingCode(num);
                 if (!res.headersSent) {
-                    await res.send({ code });
+                    pairSessions.set(id, { status: 'pending', session: null });
+                    // Tunarudisha na reqId ili browser iweze kutumia kuomba Session ID
+                    await res.send({ code, reqId: id });
                 }
             }
 
         } catch (err) {
             console.log('Pair service error:', err);
-            removeFile('./temp/' + id);
+            removeFile(sessionPath);
             if (!res.headersSent) {
                 await res.send({ code: 'Service Currently Unavailable' });
             }
@@ -94,6 +113,15 @@ router.get('/', async (req, res) => {
     }
 
     await JUNEX();
+});
+
+// 2. Route mpya ya ku-check kama Session ID imezalishwa kwa ajili ya Website
+router.get('/get-session', (req, res) => {
+    const reqId = req.query.id;
+    if (!reqId || !pairSessions.has(reqId)) {
+        return res.status(404).json({ status: 'not_found' });
+    }
+    return res.json(pairSessions.get(reqId));
 });
 
 module.exports = router;
