@@ -1,8 +1,8 @@
 {
-  "name": "Session Generator",
-  "description": "Web Session Generator",
+  "name": "Adevos-X Bot Pair Site",
+  "description": "Adevos-X Bot Web Session Generator",
   "logo": "https://files.catbox.moe/bdwqa7.jpg",
-  "repository": "https://github.com/adevos-x-tech/adevosxbot",
+  "repository": "https://github.com/adevos-x-tech/pair-site",
   "success_url": "/",
   "buildpacks": [
     {
@@ -11,12 +11,12 @@
   ],
   "env": {
     "MESSAGE": {
-      "description": "Ujumbe utakaotokea (Mfano: Adevos-X Tech)",
+      "description": "Adevos-X Tech Key Word",
       "value": "Adevos-X Tech",
       "required": false
     },
     "PORT": {
-      "description": "Port ya kuendeshea web app",
+      "description": "Port for Website",
       "value": "5000",
       "required": false
     }
