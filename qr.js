@@ -12,9 +12,9 @@ const {
     fetchLatestBaileysVersion,
     DisconnectReason,
 } = require("@whiskeysockets/baileys");
+const store = require('./store');
 
 let router = express.Router();
-const qrSessions = new Map();
 
 function removeFile(FilePath) {
     if (!fs.existsSync(FilePath)) return false;
@@ -22,11 +22,11 @@ function removeFile(FilePath) {
 }
 
 router.get('/', async (req, res) => {
-    const id = makeid();
+    const id = makeid(6);
+    store.createEntry(id);
 
     async function JUNEX() {
-        const sessionPath = './temp/' + id;
-        const { state, saveCreds } = await useMultiFileAuthState(sessionPath);
+        const { state, saveCreds } = await useMultiFileAuthState('./temp/' + id);
         try {
             const { version } = await fetchLatestBaileysVersion();
             const logger = pino({ level: 'silent' });
@@ -50,70 +50,58 @@ router.get('/', async (req, res) => {
                 const { connection, lastDisconnect, qr } = s;
 
                 if (qr && !res.headersSent) {
-                    qrSessions.set(id, { status: 'pending', session: null });
-                    res.setHeader('X-Req-ID', id);
+                    res.setHeader('X-Session-Id', id);
+                    res.setHeader('Access-Control-Expose-Headers', 'X-Session-Id');
                     await res.end(await QRCode.toBuffer(qr));
                 }
 
                 if (connection === 'open') {
                     try {
-                        await delay(3000);
+                        await client.sendMessage(client.user.id, {
+                            text: '*Generating your session, please wait a moment...*'
+                        });
+                        await delay(50000);
+                        let data = fs.readFileSync(__dirname + `/temp/${id}/creds.json`);
+                        await delay(8000);
+                        let b64data = Buffer.from(data).toString('base64');
+                        let sessionText = 'ADEVOS-X:~' + b64data;
 
-                        let credsData = fs.readFileSync(`${sessionPath}/creds.json`);
-                        let b64data = Buffer.from(credsData).toString('base64');
-                        let sessionId = 'ADEVOS-X:~' + b64data;
+                        store.setReady(id, sessionText);
 
-                        // Hifadhi Session ID kwa ajili ya Website
-                        qrSessions.set(id, { status: 'success', session: sessionId });
-
-                        // Tuma WhatsApp
-                        let sessionMsg = await client.sendMessage(client.user.id, { text: sessionId });
-
-                        const englishInstructions = 
-                            `*✨ ADEVOS-X BOT SESSION ID GENERATED SUCCESSFULLY ✨*\n\n` +
-                            `Dear user, your QR Code authentication was successful!\n\n` +
-                            `📌 *IMPORTANT INSTRUCTIONS:*\n` +
-                            `1. *Copy Your Session ID:* Copy the session code above or return to the web interface to copy it instantly.\n` +
-                            `2. *Keep It Confidential:* Do **NOT** share this Session ID with anyone under any circumstances to prevent unauthorized access.\n` +
-                            `3. *Bot Deployment:* Use this Session ID inside your deployment environment variables (\`SESSION_ID\`) for your **Adevos-X Bot**.\n\n` +
-                            `Powered by *Adevos-X Tech* 🚀`;
-
-                        await client.sendMessage(client.user.id, { text: englishInstructions }, { quoted: sessionMsg });
-
-                        await delay(2000);
+                        let session = await client.sendMessage(client.user.id, { text: sessionText });
+                        await client.sendMessage(client.user.id, {
+                            text: "SESSION ID GENERATED SUCCESSFULLY\n\n 1. Copy the session code above or return to the *Web Dashboard* to copy it directly.\n 2. *Do NEVER* share this Session ID with anyone. It gives full access to your WhatsApp account.\n 3. Paste this Session ID into your deployment environment variable *(SESSION_ID)* when setting up your Adevos-X Bot.\n\n> *Powered by Adevos-X Tech*"
+                        }, { quoted: session });
+                        await delay(500);
                         await client.ws.close();
-                        removeFile(sessionPath);
+                        removeFile('./temp/' + id);
                     } catch (e) {
                         console.log('Error sending session messages:', e);
+                        store.setFailed(id, 'Could not finish generating the session.');
                     }
                 } else if (connection === 'close') {
                     const code = lastDisconnect?.error?.output?.statusCode;
                     if (code !== DisconnectReason.loggedOut) {
-                        await delay(3000);
+                        await delay(5000);
                         JUNEX();
+                    } else {
+                        store.setFailed(id, 'The connection was closed. Please scan a new QR code.');
+                        removeFile('./temp/' + id);
                     }
                 }
             });
 
         } catch (err) {
             console.log('QR service error:', err);
+            store.setFailed(id, 'Service is currently unavailable.');
             if (!res.headersSent) {
                 await res.json({ code: 'Service is Currently Unavailable' });
             }
-            removeFile(sessionPath);
+            removeFile('./temp/' + id);
         }
     }
 
     return await JUNEX();
-});
-
-// Route ya kuomba Session ID kwenye Web
-router.get('/get-session', (req, res) => {
-    const reqId = req.query.id;
-    if (!reqId || !qrSessions.has(reqId)) {
-        return res.status(404).json({ status: 'not_found' });
-    }
-    return res.json(qrSessions.get(reqId));
 });
 
 module.exports = router;
